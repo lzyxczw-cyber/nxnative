@@ -2,6 +2,13 @@
 import Foundation
 import Combine
 
+/// Localised text for a UI key. The English literal is the key; a `Localizable.strings` in the language's
+/// `.lproj` (the iOS app ships zh-Hans and zh-Hant) translates it. A key without a translation, and the Mac
+/// app, which has no such resources, keep the English text.
+func L(_ key: String) -> String {
+    NSLocalizedString(key, tableName: nil, bundle: .main, value: key, comment: "")
+}
+
 struct Setting: Decodable, Identifiable {
     let env, kind, label, note, def: String
     let section: String?   // heading on the settings screen; absent in older bundles
@@ -13,7 +20,7 @@ struct Setting: Decodable, Identifiable {
     let min, max, step: Double?   // range
     let on, off: String?   // toggle: the values the variable takes (1 / 0 when not given)
     var id: String { env }
-    var sectionTitle: String { section ?? "Game" }
+    var sectionTitle: String { section ?? L("Game") }
     var basic: Bool { level == "basic" }
     var onValue: String { on ?? "1" }
     var offValue: String { off ?? "0" }

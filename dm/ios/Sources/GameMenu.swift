@@ -8,17 +8,17 @@ var gameMenuModel: LauncherModel?   // the settings screen's model (Launcher.swi
 
 @_cdecl("dm_game_menu")
 public func dmGameMenu() -> UnsafeMutableRawPointer {
-    let title = gameMenuModel != nil ? "More settings on the start screen" : ""
+    let title = gameMenuModel != nil ? L("More settings on the start screen") : ""
     let menu = UIMenu(title: title, children: [UIDeferredMenuElement.uncached { done in done(gameMenuItems()) }])   // built each time it opens, so it shows the current choices
     return Unmanaged.passRetained(menu).toOpaque()
 }
 
 private func gameMenuItems() -> [UIMenuElement] {
-    let names = ["2D", "3D", "Tap"]
+    let names = [L("2D"), L("3D"), L("Tap")]
     let layouts = (0..<3).filter { dm_pad_layout_offered(Int32($0)) }.map { l in
         UIAction(title: names[l], state: dm_pad_layout() == l ? .on : .off) { _ in dm_pad_layout_set(Int32(l)) }
     }
-    let layout = UIMenu(title: "Controller layout", options: .singleSelection, children: layouts)   // a choice's value shows in its submenu: a subtitle would make each row two lines
+    let layout = UIMenu(title: L("Controller layout"), options: .singleSelection, children: layouts)   // a choice's value shows in its submenu: a subtitle would make each row two lines
     var items: [UIMenuElement] = []
     var placed = false
     if let m = gameMenuModel {
@@ -38,12 +38,12 @@ private func gameMenuRow(_ m: LauncherModel, _ s: Setting) -> UIMenuElement {
     let attributes: UIMenuElement.Attributes = fixed ? .disabled : []
     func pick(_ v: String) { m.choose(s, v); _ = dm_setting_live(s.env, v) }
     if s.kind == "toggle" {
-        let a = UIAction(title: s.label, attributes: attributes, state: now == s.onValue ? .on : .off) { _ in pick(now == s.onValue ? s.offValue : s.onValue) }
-        if fixed { a.subtitle = "Set in env.txt" }
+        let a = UIAction(title: L(s.label), attributes: attributes, state: now == s.onValue ? .on : .off) { _ in pick(now == s.onValue ? s.offValue : s.onValue) }
+        if fixed { a.subtitle = L("Set in env.txt") }
         return a
     }
     let options = s.options ?? []
     let current = options.first { $0[0] == now }?[1] ?? now
-    let actions = options.map { o in UIAction(title: o[1], attributes: attributes, state: o[0] == now ? .on : .off) { _ in pick(o[0]) } }
-    return UIMenu(title: s.label, subtitle: fixed ? "\(current), set in env.txt" : nil, options: .singleSelection, children: actions)
+    let actions = options.map { o in UIAction(title: L(o[1]), attributes: attributes, state: o[0] == now ? .on : .off) { _ in pick(o[0]) } }
+    return UIMenu(title: L(s.label), subtitle: fixed ? String(format: L("%@, set in env.txt"), current) : nil, options: .singleSelection, children: actions)
 }
